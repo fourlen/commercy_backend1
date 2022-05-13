@@ -17,5 +17,9 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('check_nickname/<slug:nickname>', views.check_nickname)
+    path('check_nickname/<slug:nickname>', views.check_nickname),
+    path('check_phone_number', views.check_phone_number),
+    path('check_code', views.check_code),
+    path('set_password', views.set_password),
+    path('login', views.login)
 ]

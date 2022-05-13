@@ -124,3 +124,8 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+SMS_API_LOGIN = '79085859410'
+SMS_API_PASSWORD = 'KX0Zv3ZvCh'
+SMS_API_SADR = 'SMS Info'
