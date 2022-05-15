@@ -21,5 +21,6 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path("create_post", views.create_post),
-    path("post<int:id>", views.get_post)
+    path("post/<int:post_id>", views.get_post),
+    path("like_post/<int:post_id>", views.like_unlike_post)
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

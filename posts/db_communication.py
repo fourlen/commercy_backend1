@@ -1,13 +1,15 @@
 from time import time
 from typing import List, TypedDict
-from posts.models import Posts, Media
+from posts.models import Posts, Media, UserLikes
 from users.db_communication import get_user
+
 
 
 import base64
 
 from django.core.files.base import ContentFile
 
+from users.models import Users
 
 
 def add_post(nickname: str, description: str, medias: List['TypedDict']):
@@ -34,12 +36,16 @@ def add_post(nickname: str, description: str, medias: List['TypedDict']):
     return post.id
     
 
-
-def like_post(nickname, post_id):
-    post = get_post_by_id(post_id)
-    post.liked.append(nickname)
-    post.count_of_likes += 1
-    post.save()
+def like_post(user_id, post_id):
+    print(UserLikes.objects.values())
+    liked = UserLikes.objects.filter(user=Users.objects.get(id=user_id),
+                                     post=Posts.objects.get(id=post_id)).first()
+    if liked:
+        liked.delete()
+    else:
+        new_like = UserLikes(user=Users.objects.get(id=user_id), post=Posts.objects.get(id=post_id))
+        new_like.save()
+    return not liked
 
 
 def get_post_by_id(post_id):

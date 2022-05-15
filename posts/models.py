@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class Posts(models.Model):
     nickname = models.CharField(max_length=100, blank=True, null=True)
     user_id = models.PositiveIntegerField(blank=True, null=True)
@@ -17,15 +18,14 @@ class Media(models.Model):
     media = models.FileField(null=True, blank=True, upload_to="media/")
     media_type = models.CharField(max_length=100, blank=True, null=True)
 
-
     class Meta:
         managed = True
         db_table = 'media'
 
 
 class UserLikes(models.Model):
-    post_id = models.ForeignKey('posts.Posts', models.DO_NOTHING, blank=True, null=True)
-    user_id = models.ForeignKey('users.Users', models.DO_NOTHING, blank=True, null=True)
+    post = models.ForeignKey('posts.Posts', models.DO_NOTHING, blank=True, null=True)
+    user = models.ForeignKey('users.Users', models.DO_NOTHING, blank=True, null=True)
 
     class Meta:
         managed = True
