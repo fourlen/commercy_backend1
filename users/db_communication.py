@@ -1,4 +1,4 @@
-from .models import Users
+from .models import Users, UserSubscriptions
 
 
 def is_nickname_exists(nickname: str) -> bool:
@@ -68,3 +68,23 @@ def update_description(token, full_name=None, nickname=None, description=None, g
     if photo:
         user.photo = photo
     user.save()
+
+
+def subscribe_unsubscribe(token, sub_id):
+    relation = UserSubscriptions.objects.filter(user_subscriber=get_user(token=token)).first()
+    if relation:
+        relation.delete()
+    else:
+        sub = UserSubscriptions(user_subscriber=get_user(token=token), user_subscription=get_user(id=sub_id))
+        sub.save()
+    return not relation
+
+
+def get_subscribers(user_id):
+    return list(map(lambda x: x.user_subscriber,
+                    list(UserSubscriptions.objects.filter(user_subscription=user_id).all())))
+
+
+def get_subscriptions(user_id):
+    return list(map(lambda x: x.user_subscription,
+                    UserSubscriptions.objects.filter(user_subscriber=user_id).all()))

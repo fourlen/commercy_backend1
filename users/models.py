@@ -19,3 +19,12 @@ class Users(models.Model):
     class Meta:
         managed = True
         db_table = 'users'
+
+
+class UserSubscriptions(models.Model):
+    user_subscriber = models.ForeignKey('Users', models.DO_NOTHING, blank=True, null=True, related_name="subscriber")
+    user_subscription = models.ForeignKey('Users', models.DO_NOTHING, blank=True, null=True,
+                                          related_name="subscription")
+    class Meta:
+        managed = True
+        db_table = 'usersubscriptions'
