@@ -5,7 +5,8 @@ from users.db_communication import get_user
 
 import base64
 from django.core.files.base import ContentFile
-from users.models import Users
+
+from users.models import Users, UserSubscriptions
 
 
 def add_post(nickname: str, description: str, medias: List['TypedDict']):
@@ -46,3 +47,4 @@ def like_post(user_id, post_id):
 
 def get_post_by_id(post_id):
     return Posts.objects.get(id=post_id)
+

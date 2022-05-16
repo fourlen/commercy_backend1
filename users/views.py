@@ -6,6 +6,8 @@ import json
 import jwt
 from time import time
 import random
+
+from users.models import UserSubscriptions, Users
 from ystories.settings import SMS_API_LOGIN, SMS_API_PASSWORD, SMS_API_SADR, SECRET_KEY
 import requests
 from loguru import logger
@@ -188,9 +190,34 @@ def edit_profile(request: HttpRequest):
                 "success": True,
             }
         )
-    except:
-        return HttpResponseBadRequest("Incorrect fields")
+    except ValidationError as ex:
+        return JsonResponse(
+            {
+                "success": "invalid_date. It must be in YYYY-MM-DD format"
+            }
+        )
 
+
+@csrf_exempt
+def subscribe_unsubscribe(request: HttpRequest, user_id: int):
+    token = request.headers.get('Authorization')
+    try:
+        answer = db.subscribe_unsubscribe(token, user_id)
+        print(db.get_subscribers(user_id))
+        print(db.get_subscriptions(Users.objects.get(token=token).id))
+        return JsonResponse(
+            {
+                "success": True,
+                "subscribe": answer
+            }
+        )
+    except Exception as ex:
+        logger.info(ex)
+        return JsonResponse(
+            {
+                "success": False
+            }
+        )
 
 @csrf_exempt
 def get_user(request: HttpRequest, user_id: int):
