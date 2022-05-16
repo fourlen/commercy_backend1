@@ -1,4 +1,6 @@
 from .models import Users
+from django.core.files.base import ContentFile
+import base64
 
 
 def is_nickname_exists(nickname: str) -> bool:
@@ -53,7 +55,7 @@ def update_password(token, password):
     user.save()
 
 
-def update_description(token, full_name=None, nickname=None, description=None, gender=None, birthday=None, photo=None):
+def update_description(token, full_name=None, nickname=None, description=None, gender=None, birthday=None, photo: str = None):
     user = Users.objects.get(token=token)
     if full_name:
         user.full_name = full_name
@@ -66,5 +68,11 @@ def update_description(token, full_name=None, nickname=None, description=None, g
     if birthday:
         user.birthday = birthday
     if photo:
-        user.photo = photo
+        data = photo
+        format, imgstr = data.split(';base64,') 
+        ext = format.split('/')[-1] 
+        data = ContentFile(base64.b64decode(imgstr), name=f'{user.nickname}_ava.{ext}')
+        user.photo = data
     user.save()
+
+

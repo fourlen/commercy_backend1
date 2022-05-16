@@ -65,6 +65,7 @@ def get_post(request: HttpRequest, post_id: int):
         )
 
 
+@csrf_exempt
 def like_unlike_post(request: HttpRequest, post_id: int):
     try:
         token = request.headers.get('Authorization')

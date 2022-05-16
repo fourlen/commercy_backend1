@@ -3,12 +3,8 @@ from typing import List, TypedDict
 from posts.models import Posts, Media, UserLikes
 from users.db_communication import get_user
 
-
-
 import base64
-
 from django.core.files.base import ContentFile
-
 from users.models import Users
 
 

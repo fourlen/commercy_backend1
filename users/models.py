@@ -14,7 +14,7 @@ class Users(models.Model):
     description = models.CharField(max_length=2000, blank=True, null=True)
     gender = models.CharField(max_length=100, blank=True, null=True)
     birthday = models.DateField(blank=True, null=True)
-    # photo = models.CharField(blank=True, null=True)
+    photo = models.ImageField(null=True, blank=True, upload_to="media/")
 
     class Meta:
         managed = True

@@ -146,7 +146,6 @@ def set_password(request: HttpRequest):
 
 @csrf_exempt
 def login(request: HttpRequest):
-    print(request.body)
     values = json.loads(request.body)
     nickname = values["nickname"]
     password = hashlib.sha256(values["password"].encode("utf-8")).hexdigest()
@@ -166,8 +165,19 @@ def login(request: HttpRequest):
     )
 
 
+
+# {
+#     "full_name": string,
+#     "nickname": string,
+#     "description": string,
+#     "gender": string, male/female
+#     "birthday": "YYYY-MM-DD",
+#     "photo": base64
+# }
+
+
 @csrf_exempt
-def set_description(request: HttpRequest):
+def edit_profile(request: HttpRequest):
     values = json.loads(request.body)
     token = request.headers.get('Authorization')
     try:
@@ -178,9 +188,25 @@ def set_description(request: HttpRequest):
                 "success": True,
             }
         )
-    except ValidationError as ex:
-        return JsonResponse(
-            {
-                "success": "invalid_date. It must be in YYYY-MM-DD format"
-            }
-        )
+    except:
+        return HttpResponseBadRequest("Incorrect fields")
+
+
+@csrf_exempt
+def get_user(request: HttpRequest, user_id: int):
+    try:
+        user = db.get_user(id=user_id)
+        return JsonResponse({
+            "nickname": user.nickname,
+            "phone_number": user.phone_number,
+            "email": user.email,
+            "is_admin": user.is_admin,
+            "is_phone_confirmed": user.is_phone_confirmed,
+            "full_name": user.full_name,
+            "description": user.description,
+            "gender": user.gender,
+            "birthday": user.birthday,
+            "photo": user.photo.url
+        })
+    except:
+        return HttpResponseBadRequest("User not found")

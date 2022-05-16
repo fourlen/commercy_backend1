@@ -16,11 +16,15 @@ Including another URLconf
 from django.urls import path
 from . import views
 
+from django.conf import settings
+from django.conf.urls.static import static
+
 urlpatterns = [
     path('check_nickname/<slug:nickname>', views.check_nickname),
     path('check_phone_number', views.check_phone_number),
     path('check_code', views.check_code),
     path('set_password', views.set_password),
     path('login', views.login),
-    path('edit_profile', views.set_description)
-]
+    path('edit_profile', views.edit_profile),
+    path('get_user/<int:user_id>', views.get_user)
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
