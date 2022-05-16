@@ -191,20 +191,16 @@ def edit_profile(request: HttpRequest):
             }
         )
     except ValidationError as ex:
-        return JsonResponse(
-            {
-                "success": "invalid_date. It must be in YYYY-MM-DD format"
-            }
-        )
+        return HttpResponseBadRequest("Incorrect fields")
 
 
 @csrf_exempt
-def subscribe_unsubscribe(request: HttpRequest, user_id: int):
+def subscribe_unsubscribe(request: HttpRequest, nickname: str):
     token = request.headers.get('Authorization')
     try:
-        answer = db.subscribe_unsubscribe(token, user_id)
-        print(db.get_subscribers(user_id))
-        print(db.get_subscriptions(Users.objects.get(token=token).id))
+        answer = db.subscribe_unsubscribe(token, nickname)
+        print(db.get_subscribers(nickname))
+        print(db.get_subscriptions(Users.objects.get(token=token).nickname))
         return JsonResponse(
             {
                 "success": True,
@@ -218,6 +214,7 @@ def subscribe_unsubscribe(request: HttpRequest, user_id: int):
                 "success": False
             }
         )
+<<<<<<< HEAD
 
 @csrf_exempt
 def get_user(request: HttpRequest, user_id: int):
@@ -237,3 +234,5 @@ def get_user(request: HttpRequest, user_id: int):
         })
     except:
         return HttpResponseBadRequest("User not found")
+=======
+>>>>>>> 9a001697232a32d458ae89b61459d9494e1465cc

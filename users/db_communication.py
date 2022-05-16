@@ -1,10 +1,6 @@
-<<<<<<< HEAD
 from .models import Users
 from django.core.files.base import ContentFile
 import base64
-=======
-from .models import Users, UserSubscriptions
->>>>>>> 84dc341d730d5e2be9f1f8f671c9bd6604c9776b
 
 
 def is_nickname_exists(nickname: str) -> bool:
@@ -81,23 +77,31 @@ def update_description(token, full_name=None, nickname=None, description=None, g
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 def subscribe_unsubscribe(token, sub_id):
+=======
+def subscribe_unsubscribe(token, nickname):
+>>>>>>> 9a001697232a32d458ae89b61459d9494e1465cc
     relation = UserSubscriptions.objects.filter(user_subscriber=get_user(token=token)).first()
     if relation:
         relation.delete()
     else:
-        sub = UserSubscriptions(user_subscriber=get_user(token=token), user_subscription=get_user(id=sub_id))
+        sub = UserSubscriptions(user_subscriber=get_user(token=token), user_subscription=get_user(nickname=nickname))
         sub.save()
     return not relation
 
 
-def get_subscribers(user_id):
+def get_subscribers(nickname):
     return list(map(lambda x: x.user_subscriber,
-                    list(UserSubscriptions.objects.filter(user_subscription=user_id).all())))
+                    list(UserSubscriptions.objects.filter(user_subscription=get_user(nickname=nickname).id).all())))
 
 
-def get_subscriptions(user_id):
+def get_subscriptions(nickname):
     return list(map(lambda x: x.user_subscription,
+<<<<<<< HEAD
                     UserSubscriptions.objects.filter(user_subscriber=user_id).all()))
 >>>>>>> 84dc341d730d5e2be9f1f8f671c9bd6604c9776b
+=======
+                    UserSubscriptions.objects.filter(user_subscriber=get_user(nickname=nickname).id).all()))
+>>>>>>> 9a001697232a32d458ae89b61459d9494e1465cc

@@ -31,6 +31,6 @@ urlpatterns = [
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 =======
     path('edit_profile', views.set_description),
-    path('<int:user_id>/subscribe', views.subscribe_unsubscribe)
+    path('<slug:nickname>/subscribe', views.subscribe_unsubscribe),
 ]
 >>>>>>> 84dc341d730d5e2be9f1f8f671c9bd6604c9776b
