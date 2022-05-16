@@ -23,5 +23,5 @@ urlpatterns = [
     path('set_password', views.set_password),
     path('login', views.login),
     path('edit_profile', views.set_description),
-    path('<int:user_id>/subscribe', views.subscribe_unsubscribe)
+    path('<slug:nickname>/subscribe', views.subscribe_unsubscribe),
 ]

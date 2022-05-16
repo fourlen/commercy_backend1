@@ -70,21 +70,21 @@ def update_description(token, full_name=None, nickname=None, description=None, g
     user.save()
 
 
-def subscribe_unsubscribe(token, sub_id):
+def subscribe_unsubscribe(token, nickname):
     relation = UserSubscriptions.objects.filter(user_subscriber=get_user(token=token)).first()
     if relation:
         relation.delete()
     else:
-        sub = UserSubscriptions(user_subscriber=get_user(token=token), user_subscription=get_user(id=sub_id))
+        sub = UserSubscriptions(user_subscriber=get_user(token=token), user_subscription=get_user(nickname=nickname))
         sub.save()
     return not relation
 
 
-def get_subscribers(user_id):
+def get_subscribers(nickname):
     return list(map(lambda x: x.user_subscriber,
-                    list(UserSubscriptions.objects.filter(user_subscription=user_id).all())))
+                    list(UserSubscriptions.objects.filter(user_subscription=get_user(nickname=nickname).id).all())))
 
 
-def get_subscriptions(user_id):
+def get_subscriptions(nickname):
     return list(map(lambda x: x.user_subscription,
-                    UserSubscriptions.objects.filter(user_subscriber=user_id).all()))
+                    UserSubscriptions.objects.filter(user_subscriber=get_user(nickname=nickname).id).all()))
