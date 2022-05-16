@@ -1,4 +1,4 @@
-from .models import Users
+from .models import Users, UserSubscriptions
 from django.core.files.base import ContentFile
 import base64
 
@@ -76,13 +76,8 @@ def update_description(token, full_name=None, nickname=None, description=None, g
     user.save()
 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-def subscribe_unsubscribe(token, sub_id):
-=======
+
 def subscribe_unsubscribe(token, nickname):
->>>>>>> 9a001697232a32d458ae89b61459d9494e1465cc
     relation = UserSubscriptions.objects.filter(user_subscriber=get_user(token=token)).first()
     if relation:
         relation.delete()
@@ -99,9 +94,4 @@ def get_subscribers(nickname):
 
 def get_subscriptions(nickname):
     return list(map(lambda x: x.user_subscription,
-<<<<<<< HEAD
-                    UserSubscriptions.objects.filter(user_subscriber=user_id).all()))
->>>>>>> 84dc341d730d5e2be9f1f8f671c9bd6604c9776b
-=======
                     UserSubscriptions.objects.filter(user_subscriber=get_user(nickname=nickname).id).all()))
->>>>>>> 9a001697232a32d458ae89b61459d9494e1465cc
