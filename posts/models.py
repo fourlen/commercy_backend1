@@ -4,7 +4,6 @@ from django.db import models
 class Posts(models.Model):
     nickname = models.CharField(max_length=100, blank=True, null=True)
     user_id = models.PositiveIntegerField(blank=True, null=True)
-    count_of_likes = models.PositiveIntegerField(blank=True, null=True)
     description = models.CharField(max_length=2000, blank=True, null=True)
     timestamp = models.IntegerField(blank=True, null=True)
 
