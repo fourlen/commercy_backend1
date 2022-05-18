@@ -214,7 +214,6 @@ def subscribe_unsubscribe(request: HttpRequest, nickname: str):
                 "success": False
             }
         )
-<<<<<<< HEAD
 
 @csrf_exempt
 def get_user(request: HttpRequest, user_id: int):
@@ -234,5 +233,3 @@ def get_user(request: HttpRequest, user_id: int):
         })
     except:
         return HttpResponseBadRequest("User not found")
-=======
->>>>>>> 9a001697232a32d458ae89b61459d9494e1465cc
