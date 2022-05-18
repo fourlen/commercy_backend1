@@ -42,7 +42,7 @@ def create_post(request: HttpRequest):
 def get_post(request: HttpRequest, post_id: int):
     try:
         post = db.get_post_by_id(post_id)
-        media = list(map(lambda x: x.media.url, list(Media.objects.filter(post_id=post_id).all())))
+        media = list(map(lambda x: {"media_type": x.media_type, "media": x.media.url}, list(Media.objects.filter(post_id=post_id).all())))
         like_set = list(map(lambda x: x.user_id, UserLikes.objects.filter(post=post_id).all()))
         print(like_set)
         return JsonResponse(
@@ -51,8 +51,8 @@ def get_post(request: HttpRequest, post_id: int):
                 "user_id": post.user_id,
                 "user_name": post.nickname,
                 "media_url": media,
-                "count_of_likes": len(like_set) - 1,
-                "date": post.timestamp,
+                "count_of_likes": len(like_set),
+                "timestamp": post.timestamp,
                 "liked": like_set[1:]
             }
         )

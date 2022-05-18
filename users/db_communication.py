@@ -1,7 +1,8 @@
 from .models import Users, UserSubscriptions
 from django.core.files.base import ContentFile
 import base64
-
+from posts.models import Posts
+import posts.db_communication as pdb
 
 def is_nickname_exists(nickname: str) -> bool:
     user = Users.objects.filter(
@@ -95,3 +96,12 @@ def get_subscriptions(nickname):
     return list(map(lambda x: x.user_subscription,
                     UserSubscriptions.objects.filter(user_subscriber=get_user(nickname=nickname).id).all()))
 
+
+def get_user_posts(nickname: str):
+    posts = list(Posts.objects.filter(nickname=nickname).all())
+    posts_with_media = []
+    for post in posts:
+        posts_with_media.append(
+            pdb.get_post_with_media(post_id=post.id)
+        )
+    return posts_with_media

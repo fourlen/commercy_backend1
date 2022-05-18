@@ -1,7 +1,7 @@
 from time import time
 from typing import List, TypedDict
 from posts.models import Posts, Media, UserLikes
-from users.db_communication import get_user
+import users.db_communication as udb
 
 import base64
 from django.core.files.base import ContentFile
@@ -12,7 +12,7 @@ from users.models import Users, UserSubscriptions
 def add_post(nickname: str, description: str, medias: List['TypedDict']):
     post = Posts(
         nickname=nickname,
-        user_id=get_user(nickname=nickname).id,
+        user_id=udb.get_user(nickname=nickname).id,
         description=description,
         timestamp=time(),
     )
@@ -47,3 +47,15 @@ def like_post(user_id, post_id):
 def get_post_by_id(post_id):
     return Posts.objects.get(id=post_id)
 
+
+def get_post_with_media(post_id: int):
+    post = get_post_by_id(post_id)
+    media = list(map(lambda x: {'media_type': x.media_type,
+                            'media': x.media.url}, list(Media.objects.filter(post_id=post_id).all())))
+    return {
+        'post_id': post.id,
+        'user_id': post.user_id,
+        'description': post.description,
+        'timestamp': post.timestamp,
+        'media': media
+    }
