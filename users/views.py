@@ -183,6 +183,14 @@ def edit_profile(request: HttpRequest):
     values = json.loads(request.body)
     token = request.headers.get('Authorization')
     try:
+        nickname = values["nickname"]
+        if db.get_user(nickname=nickname) and db.get_user(nickname=nickname).token != token:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": "Nickname is already exist"
+                }
+            )
         db.update_description(token, values["full_name"], values["nickname"], values["description"],
                               values["gender"], values["birthday"], values["photo"])
         return JsonResponse(
@@ -191,6 +199,7 @@ def edit_profile(request: HttpRequest):
             }
         )
     except ValidationError as ex:
+        logger.error(ex)
         return HttpResponseBadRequest("Incorrect fields")
 
 
@@ -214,11 +223,19 @@ def subscribe_unsubscribe(request: HttpRequest, nickname: str):
                 "success": False
             }
         )
+<<<<<<< HEAD
+=======
+
+>>>>>>> 2a5fa403bb8b59b5c5406cc18f2335233f331bb3
 
 @csrf_exempt
-def get_user(request: HttpRequest, user_id: int):
+def get_user(request: HttpRequest, nickname: str):
     try:
-        user = db.get_user(id=user_id)
+        print(Users.objects.values())
+        user = db.get_user(nickname=nickname)
+        photo_url = None
+        if user.photo:
+            photo_url = user.photo.url
         return JsonResponse({
             "nickname": user.nickname,
             "phone_number": user.phone_number,
@@ -228,8 +245,9 @@ def get_user(request: HttpRequest, user_id: int):
             "full_name": user.full_name,
             "description": user.description,
             "gender": user.gender,
-            "birthday": user.birthday,
-            "photo": user.photo.url
+            "birthday": user.timestamp,
+            "photo": photo_url
         })
-    except:
+    except Exception as ex:
+        logger.error(ex)
         return HttpResponseBadRequest("User not found")

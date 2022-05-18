@@ -66,7 +66,7 @@ def update_description(token, full_name=None, nickname=None, description=None, g
     if gender:
         user.gender = gender
     if birthday:
-        user.birthday = birthday
+        user.timestamp = birthday
     if photo:
         data = photo
         format, imgstr = data.split(';base64,') 
@@ -74,7 +74,6 @@ def update_description(token, full_name=None, nickname=None, description=None, g
         data = ContentFile(base64.b64decode(imgstr), name=f'{user.nickname}_ava.{ext}')
         user.photo = data
     user.save()
-
 
 
 def subscribe_unsubscribe(token, nickname):
@@ -95,3 +94,4 @@ def get_subscribers(nickname):
 def get_subscriptions(nickname):
     return list(map(lambda x: x.user_subscription,
                     UserSubscriptions.objects.filter(user_subscriber=get_user(nickname=nickname).id).all()))
+

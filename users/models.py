@@ -13,7 +13,7 @@ class Users(models.Model):
     full_name = models.CharField(max_length=100, blank=True, null=True)
     description = models.CharField(max_length=2000, blank=True, null=True)
     gender = models.CharField(max_length=100, blank=True, null=True)
-    birthday = models.DateField(blank=True, null=True)
+    timestamp = models.IntegerField(blank=True, null=True)
     photo = models.ImageField(null=True, blank=True, upload_to="media/")
 
     class Meta:
@@ -25,6 +25,7 @@ class UserSubscriptions(models.Model):
     user_subscriber = models.ForeignKey('Users', models.DO_NOTHING, blank=True, null=True, related_name="subscriber")
     user_subscription = models.ForeignKey('Users', models.DO_NOTHING, blank=True, null=True,
                                           related_name="subscription")
+
     class Meta:
         managed = True
         db_table = 'usersubscriptions'

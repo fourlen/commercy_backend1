@@ -14,7 +14,6 @@ def add_post(nickname: str, description: str, medias: List['TypedDict']):
         nickname=nickname,
         user_id=get_user(nickname=nickname).id,
         description=description,
-        count_of_likes=0,
         timestamp=time(),
     )
     post.save()
@@ -25,7 +24,7 @@ def add_post(nickname: str, description: str, medias: List['TypedDict']):
         ext = format.split('/')[-1] 
         data = ContentFile(base64.b64decode(imgstr), name=f'{nickname}_{post.id}_{i}.{ext}')
         media = Media(
-            post_id = post,
+            post_id=post,
             media=data,
             media_type=media_type
         )
