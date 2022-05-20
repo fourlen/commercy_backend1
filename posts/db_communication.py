@@ -45,7 +45,18 @@ def like_post(user_id, post_id):
 
 
 def get_post_by_id(post_id):
-    return Posts.objects.get(id=post_id)
+    post = Posts.objects.get(id=post_id)
+    media = list(map(lambda x: x.media.url, list(Media.objects.filter(post_id=post_id).all())))
+    like_set = list(map(lambda x: x.user_id, UserLikes.objects.filter(post=post_id).all()))
+    return {
+        "post_id": post.id,
+        "user_id": post.user_id,
+        "user_name": post.nickname,
+        "media_url": media,
+        "count_of_likes": len(like_set),
+        "date": post.timestamp,
+        "liked": like_set
+    }
 
 
 def get_post_with_media(post_id: int):

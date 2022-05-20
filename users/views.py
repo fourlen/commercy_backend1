@@ -173,7 +173,8 @@ def login(request: HttpRequest):
         return JsonResponse(
             {
                 'is_correct': is_correct,
-                'token': user.token
+                'token': user.token,
+                'nickname': user.nickname
             }
         )
     return JsonResponse(
@@ -181,8 +182,6 @@ def login(request: HttpRequest):
             'is_correct': is_correct,
         }
     )
-
-
 
 # {
 #     "full_name": string,
@@ -224,8 +223,8 @@ def subscribe_unsubscribe(request: HttpRequest, nickname: str):
     token = request.headers.get('Authorization')
     try:
         answer = db.subscribe_unsubscribe(token, nickname)
-        print(db.get_subscribers(nickname))
-        print(db.get_subscriptions(Users.objects.get(token=token).nickname))
+        logger.info(db.get_subscribers(nickname))
+        logger.info(db.get_subscriptions(Users.objects.get(token=token).nickname))
         return JsonResponse(
             {
                 "success": True,
@@ -233,12 +232,8 @@ def subscribe_unsubscribe(request: HttpRequest, nickname: str):
             }
         )
     except Exception as ex:
-        logger.info(ex)
-        return JsonResponse(
-            {
-                "success": False
-            }
-        )
+        logger.error(ex)
+        return HttpResponseBadRequest(ex)
 
 @csrf_exempt
 def get_user(request: HttpRequest, nickname: str):
@@ -265,3 +260,19 @@ def get_user(request: HttpRequest, nickname: str):
     except Exception as ex:
         logger.error(ex)
         return HttpResponseBadRequest("User not found")
+
+
+@csrf_exempt
+def search(request: HttpRequest):
+    try:
+        values = json.loads(request.body)
+        string = values["string"]
+        return JsonResponse(
+            {
+                "all_users": db.get_result_by_search(string)
+            }
+        )
+    except Exception as ex:
+        logger.error(ex)
+        return HttpResponseBadRequest(ex)
+
