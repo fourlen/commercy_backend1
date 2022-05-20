@@ -13,7 +13,6 @@ import requests
 from loguru import logger
 import hashlib
 
-
 # request
 # {}
 # response
@@ -219,11 +218,9 @@ def subscribe_unsubscribe(request: HttpRequest, nickname: str):
         logger.error(ex)
         return HttpResponseBadRequest(ex)
 
-
 @csrf_exempt
 def get_user(request: HttpRequest, nickname: str):
     try:
-        print(Users.objects.values())
         user = db.get_user(nickname=nickname)
         photo_url = None
         if user.photo:
@@ -238,7 +235,10 @@ def get_user(request: HttpRequest, nickname: str):
             "description": user.description,
             "gender": user.gender,
             "birthday": user.timestamp,
-            "photo": photo_url
+            "photo": photo_url,
+            "posts": db.get_user_posts(nickname=user.nickname),
+            "subscibers": db.get_subscribers(user.nickname),
+            "subscriptions": db.get_subscriptions(user.nickname)
         })
     except Exception as ex:
         logger.error(ex)
