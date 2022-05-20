@@ -157,7 +157,8 @@ def login(request: HttpRequest):
         return JsonResponse(
             {
                 'is_correct': is_correct,
-                'token': user.token
+                'token': user.token,
+                'nickname': user.nickname
             }
         )
     return JsonResponse(
@@ -165,8 +166,6 @@ def login(request: HttpRequest):
             'is_correct': is_correct,
         }
     )
-
-
 
 # {
 #     "full_name": string,
@@ -244,3 +243,5 @@ def get_user(request: HttpRequest, nickname: str):
     except Exception as ex:
         logger.error(ex)
         return HttpResponseBadRequest("User not found")
+
+

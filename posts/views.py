@@ -98,3 +98,18 @@ def get_feed(request: HttpRequest):
     except Exception as ex:
         logger.error(ex)
         return HttpResponseBadRequest(ex)
+
+
+@csrf_exempt
+def get_rec(request: HttpRequest):
+    try:
+        rec = sorted(list(Posts.objects.values()), key=(lambda x: db.get_post_by_id(x['id'])['count_of_likes']))
+        print(rec)
+        return JsonResponse(
+            {
+                'posts': list(map(lambda x: db.get_post_by_id(x['id']), rec))
+            }
+        )
+    except Exception as ex:
+        logger.error(ex)
+        return HttpResponseBadRequest(ex)
