@@ -208,8 +208,8 @@ def subscribe_unsubscribe(request: HttpRequest, nickname: str):
     token = request.headers.get('Authorization')
     try:
         answer = db.subscribe_unsubscribe(token, nickname)
-        print(db.get_subscribers(nickname))
-        print(db.get_subscriptions(Users.objects.get(token=token).nickname))
+        logger.info(db.get_subscribers(nickname))
+        logger.info(db.get_subscriptions(Users.objects.get(token=token).nickname))
         return JsonResponse(
             {
                 "success": True,
@@ -217,12 +217,8 @@ def subscribe_unsubscribe(request: HttpRequest, nickname: str):
             }
         )
     except Exception as ex:
-        logger.info(ex)
-        return JsonResponse(
-            {
-                "success": False
-            }
-        )
+        logger.error(ex)
+        return HttpResponseBadRequest(ex)
 
 
 @csrf_exempt

@@ -3,9 +3,11 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpRequest, JsonResponse, HttpResponseBadRequest
 import posts.db_communication as db
 from posts.models import Posts, Media, UserLikes
-from users.db_communication import get_user
+from users.db_communication import get_user, get_subscriptions
 import json
 from loguru import logger
+
+from users.models import Users
 
 
 @csrf_exempt
@@ -41,20 +43,8 @@ def create_post(request: HttpRequest):
 @csrf_exempt
 def get_post(request: HttpRequest, post_id: int):
     try:
-        post = db.get_post_by_id(post_id)
-        media = list(map(lambda x: x.media.url, list(Media.objects.filter(post_id=post_id).all())))
-        like_set = list(map(lambda x: x.user_id, UserLikes.objects.filter(post=post_id).all()))
-        print(like_set)
         return JsonResponse(
-            {
-                "post_id": post.id,
-                "user_id": post.user_id,
-                "user_name": post.nickname,
-                "media_url": media,
-                "count_of_likes": len(like_set) - 1,
-                "date": post.timestamp,
-                "liked": like_set[1:]
-            }
+            db.get_post_by_id(post_id=post_id)
         )
     except Exception as ex:
         logger.error(ex)
@@ -84,3 +74,27 @@ def like_unlike_post(request: HttpRequest, post_id: int):
                 "success": False,
             }
         )
+
+
+@csrf_exempt
+def get_feed(request: HttpRequest):
+    try:
+        token = request.headers.get('Authorization')
+        user = get_user(token=token)
+        all_subs_id = list(map(lambda x: x.id, get_subscriptions(user.nickname)))
+        all_posts = list(filter(lambda x: x['user_id'] in all_subs_id, list(Posts.objects.values())[::-1]))
+        json_ret = []
+        k = 0
+        for i in all_posts:
+            k += 1
+            if k > 14:
+                break
+            json_ret.append(db.get_post_by_id(i['id']))
+        return JsonResponse(
+            {
+                "feed": json_ret
+            }
+        )
+    except Exception as ex:
+        logger.error(ex)
+        return HttpResponseBadRequest(ex)
