@@ -245,3 +245,17 @@ def get_user(request: HttpRequest, nickname: str):
         return HttpResponseBadRequest("User not found")
 
 
+@csrf_exempt
+def search(request: HttpRequest):
+    try:
+        values = json.loads(request.body)
+        string = values["string"]
+        return JsonResponse(
+            {
+                "all_users": db.get_result_by_search(string)
+            }
+        )
+    except Exception as ex:
+        logger.error(ex)
+        return HttpResponseBadRequest(ex)
+
