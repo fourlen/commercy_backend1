@@ -89,6 +89,7 @@ def check_story(request: HttpRequest, story_id: int):
             {
                 "success": True,
                 "media": story.media.url,
+                "media_type": story.media_type,
                 "timestamp": story.timestamp
             }
         )

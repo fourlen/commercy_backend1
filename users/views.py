@@ -58,20 +58,37 @@ def check_nickname(request: HttpRequest, nickname: str):
 
 
 @csrf_exempt
-def check_phone_number(request: HttpRequest):
+def check_phone_number(request: HttpRequest):  
     try:
         values = json.loads(request.body)
         code = str(random.randint(0, 9999)).ljust(4, '0')
         db.update_phone_number(values['nickname'], values['phone_number'])
-        url = f'https://gateway.api.sc/get/' \
-              f'?user={SMS_API_LOGIN}' \
-              f'&pwd={SMS_API_PASSWORD}' \
-              f'&name_deliver=Ystories' \
-              f'&text={code}' \
-              f'&dadr={values["phone_number"]}' \
-              f'&sadr={SMS_API_SADR}'
-        r = requests.post(url)
-        logger.info(f'SMS sent. ID: {r.text}')
+        # url = f'https://gateway.api.sc/get/' \
+        #       f'?user={SMS_API_LOGIN}' \
+        #       f'&pwd={SMS_API_PASSWORD}' \
+        #       f'&name_deliver=Ystories' \
+        #       f'&text={code}' \
+        #       f'&dadr={values["phone_number"]}' \
+        #       f'&sadr={SMS_API_SADR}'
+        # r = requests.post(url)
+        body = json.dumps(
+            {
+                "messages": [
+                    {
+                        "phone": values['phone_number'], 
+                        "sender": "City", 
+                        "clientId": "1", 
+                        "text": code
+                    }
+                ], 
+                "statusQueueName": "myQueue", 
+                "showBillingDetails": True, 
+                "login": "pkvr0101509", 
+                "password": "778835"
+            }
+        )
+        r = requests.post('https://api.iqsms.ru/messages/v2/send.json', data=body)
+        logger.info(f'SMS sent. Response: {r.text}')
         db.update_code(values['nickname'], code)
         return JsonResponse({
             'success': True
