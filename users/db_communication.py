@@ -97,5 +97,6 @@ def get_subscriptions(nickname):
 
 
 def get_result_by_search(string):
-    return list(list(filter(lambda x: string in x, map(lambda x: x["nickname"], list(Users.objects.values())))))
+    return list(list(filter(lambda x: string in x["nickname"],
+                            map(lambda x: {'nickname': x["nickname"], 'photo': x['photo']}, list(Users.objects.values())))))
 
