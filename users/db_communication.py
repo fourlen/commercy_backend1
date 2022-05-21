@@ -55,7 +55,8 @@ def update_password(token, password):
     user.save()
 
 
-def update_description(token, full_name=None, nickname=None, description=None, gender=None, birthday=None, photo: str = None):
+def update_description(token, full_name=None, nickname=None, description=None, gender=None, birthday=None,
+                       photo: str = None):
     user = Users.objects.get(token=token)
     if full_name:
         user.full_name = full_name
@@ -69,8 +70,8 @@ def update_description(token, full_name=None, nickname=None, description=None, g
         user.timestamp = birthday
     if photo:
         data = photo
-        format, imgstr = data.split(';base64,') 
-        ext = format.split('/')[-1] 
+        format, imgstr = data.split(';base64,')
+        ext = format.split('/')[-1]
         data = ContentFile(base64.b64decode(imgstr), name=f'{user.nickname}_ava.{ext}')
         user.photo = data
     user.save()
@@ -106,6 +107,10 @@ def get_result_by_search(string, token):
 
 
 def is_your_subscriber(user, token):
+<<<<<<< HEAD
+=======
+    print(get_subscribers(Users.objects.get(token=token).nickname))
+>>>>>>> 3087f1173f52777d9e4a05946eb26a47a77c8e9e
     return user in get_subscribers(Users.objects.get(token=token).nickname)
 
 

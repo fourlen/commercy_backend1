@@ -272,11 +272,12 @@ def get_user(request: HttpRequest, nickname: str):
 @csrf_exempt
 def search(request: HttpRequest):
     try:
+        token = request.headers.get('Authorization')
         values = json.loads(request.body)
         string = values["string"]
         return JsonResponse(
             {
-                "all_users": db.get_result_by_search(string),
+                "all_users": db.get_result_by_search(string, token)
             }
         )
     except Exception as ex:
