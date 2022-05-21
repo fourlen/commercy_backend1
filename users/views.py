@@ -12,6 +12,7 @@ from ystories.settings import SMS_API_LOGIN, SMS_API_PASSWORD, SMS_API_SADR, SEC
 import requests
 from loguru import logger
 import hashlib
+from posts.db_communication import get_user_posts
 
 # request
 # {}
@@ -168,7 +169,7 @@ def login(request: HttpRequest):
     nickname = values["nickname"]
     password = hashlib.sha256(values["password"].encode("utf-8")).hexdigest()
     user = db.get_user(nickname=nickname)
-    is_correct = user and user.password == password
+    is_correct = bool(user and user.password == password)
     if is_correct:
         return JsonResponse(
             {
@@ -235,9 +236,10 @@ def subscribe_unsubscribe(request: HttpRequest, nickname: str):
         logger.error(ex)
         return HttpResponseBadRequest(ex)
 
+
 @csrf_exempt
 def get_user(request: HttpRequest, nickname: str):
-    try:
+  #  try:
         user = db.get_user(nickname=nickname)
         photo_url = None
         if user.photo:
@@ -253,13 +255,13 @@ def get_user(request: HttpRequest, nickname: str):
             "gender": user.gender,
             "birthday": user.timestamp,
             "photo": photo_url,
-            "posts": db.get_user_posts(nickname=user.nickname),
-            "subscibers": db.get_subscribers(user.nickname),
-            "subscriptions": db.get_subscriptions(user.nickname)
+            "posts": get_user_posts(user.nickname),
+            "subscribers": list(map(lambda x: x.nickname, db.get_subscribers(user.nickname))),
+            "subscriptions": list(map(lambda x: x.nickname, db.get_subscriptions(user.nickname)))
         })
-    except Exception as ex:
-        logger.error(ex)
-        return HttpResponseBadRequest("User not found")
+    # except Exception as ex:
+    #     logger.error(ex)
+    #     return HttpResponseBadRequest(ex)
 
 
 @csrf_exempt
@@ -269,7 +271,7 @@ def search(request: HttpRequest):
         string = values["string"]
         return JsonResponse(
             {
-                "all_users": db.get_result_by_search(string)
+                "all_users": db.get_result_by_search(string),
             }
         )
     except Exception as ex:
