@@ -96,7 +96,18 @@ def get_subscriptions(nickname):
                     UserSubscriptions.objects.filter(user_subscriber=get_user(nickname=nickname).id).all()))
 
 
-def get_result_by_search(string):
+def get_result_by_search(string, token):
     return list(list(filter(lambda x: string in x["nickname"],
-                            map(lambda x: {'nickname': x["nickname"], 'photo': x['photo']}, list(Users.objects.values())))))
+                            map(lambda x: {'nickname': x["nickname"], 'photo': x['photo'], "is_in_your_subscription":
+                                is_you_subscriber(get_user(nickname=x["nickname"]), token),
+                                           "is_in_your_subscribers": is_your_subscriber(get_user(nickname=x["nickname"])
+                                                                                        , token)},
+                                list(Users.objects.values())))))
 
+
+def is_your_subscriber(user, token):
+    return user in get_subscribers(Users.objects.get(token=token).nickname)
+
+
+def is_you_subscriber(user, token):
+    return user in get_subscriptions(Users.objects.get(token=token).nickname)

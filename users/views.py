@@ -239,7 +239,8 @@ def subscribe_unsubscribe(request: HttpRequest, nickname: str):
 
 @csrf_exempt
 def get_user(request: HttpRequest, nickname: str):
-  #  try:
+    try:
+        token = request.headers.get('Authorization')
         user = db.get_user(nickname=nickname)
         photo_url = None
         if user.photo:
@@ -256,12 +257,16 @@ def get_user(request: HttpRequest, nickname: str):
             "birthday": user.timestamp,
             "photo": photo_url,
             "posts": get_user_posts(user.nickname),
-            "subscribers": list(map(lambda x: x.nickname, db.get_subscribers(user.nickname))),
-            "subscriptions": list(map(lambda x: x.nickname, db.get_subscriptions(user.nickname)))
+            "subscribers": list(map(lambda x: {"nickname": x.nickname, "photo": (x.photo.url if x.photo else None)},
+                                    db.get_subscribers(user.nickname))),
+            "subscriptions": list(map(lambda x: {"nickname": x.nickname, "photo": (x.photo.url if x.photo else None)},
+                                      db.get_subscriptions(user.nickname))),
+            "is_in_your_subscription": db.is_you_subscriber(user, token),
+            "is_in_your_subscribers": db.is_your_subscriber(user, token)
         })
-    # except Exception as ex:
-    #     logger.error(ex)
-    #     return HttpResponseBadRequest(ex)
+    except Exception as ex:
+        logger.error(ex)
+        return HttpResponseBadRequest(ex)
 
 
 @csrf_exempt
