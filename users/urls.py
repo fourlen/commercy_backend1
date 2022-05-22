@@ -28,5 +28,6 @@ urlpatterns = [
     path('edit_profile', views.edit_profile),
     path('get_user/<slug:nickname>', views.get_user),
     path('subscribe/<slug:nickname>', views.subscribe_unsubscribe),
-    path('search', views.search)
+    path('search', views.search),
+    path('notification', views.get_notifications)
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

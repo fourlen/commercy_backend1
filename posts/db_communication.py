@@ -6,7 +6,7 @@ import users.db_communication as udb
 import base64
 from django.core.files.base import ContentFile
 
-from users.models import Users, UserSubscriptions
+from users.models import Users
 
 
 def add_post(nickname: str, description: str, medias: List['TypedDict']):
@@ -33,13 +33,13 @@ def add_post(nickname: str, description: str, medias: List['TypedDict']):
     
 
 def like_post(user_id, post_id):
-    print(UserLikes.objects.values())
     liked = UserLikes.objects.filter(user=Users.objects.get(id=user_id),
                                      post=Posts.objects.get(id=post_id)).first()
     if liked:
         liked.delete()
     else:
-        new_like = UserLikes(user=Users.objects.get(id=user_id), post=Posts.objects.get(id=post_id))
+        new_like = UserLikes(user=Users.objects.get(id=user_id), post=Posts.objects.get(id=post_id),
+                             timestamp=time())
         new_like.save()
     return not liked
 

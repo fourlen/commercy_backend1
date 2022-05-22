@@ -4,7 +4,7 @@ from typing import TypedDict
 
 from django.core.files.base import ContentFile
 
-from users.db_communication import get_user
+import users.db_communication as db
 from users.models import Users
 from stories.models import *
 
@@ -28,13 +28,13 @@ def get_target_story(story_id: int):
 
 
 def set_unset_story_like(story_id: int, token: str):
-    user = get_user(token=token)
+    user = db.get_user(token=token)
     story = get_target_story(story_id)
     like = UserLikesStories.objects.filter(liked_user=user, liked_story=story).first()
     if like:
         like.delete()
     else:
-        new_like = UserLikesStories(liked_user=user, liked_story=story)
+        new_like = UserLikesStories(liked_user=user, liked_story=story, timestamp=time())
         new_like.save()
     return like
 
@@ -45,7 +45,7 @@ def get_story_likes(story_id: int):
 
 
 def set_story_view(story_id: int, token: str):
-    user = get_user(token=token)
+    user = db.get_user(token=token)
     story = get_target_story(story_id)
     view = UserViewStories.objects.filter(viewed_user=user, viewed_story=story).first()
     if not view:

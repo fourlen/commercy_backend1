@@ -17,6 +17,7 @@ class Stories(models.Model):
 class UserLikesStories(models.Model):
     liked_story = models.ForeignKey('stories.Stories', models.DO_NOTHING, blank=True, null=True)
     liked_user = models.ForeignKey('users.Users', models.DO_NOTHING, blank=True, null=True)
+    timestamp = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = True

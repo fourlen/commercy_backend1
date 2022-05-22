@@ -7,12 +7,16 @@ import jwt
 from time import time
 import random
 
-from users.models import UserSubscriptions, Users
+from posts.models import UserLikes
+from stories.models import UserLikesStories
+from users.models import Users, UserSubscriptions
 from ystories.settings import SMS_API_LOGIN, SMS_API_PASSWORD, SMS_API_SADR, SECRET_KEY
 import requests
+from stories.db_communication import get_stories, get_story_view
 from loguru import logger
 import hashlib
 from posts.db_communication import get_user_posts
+
 
 # request
 # {}
@@ -167,6 +171,7 @@ def login(request: HttpRequest):
         }
     )
 
+
 # {
 #     "full_name": string,
 #     "nickname": string,
@@ -195,6 +200,7 @@ def edit_profile(request: HttpRequest):
         return JsonResponse(
             {
                 "success": True,
+                "user": db.get_full_user(token, nickname)
             }
         )
     except ValidationError as ex:
@@ -212,7 +218,8 @@ def subscribe_unsubscribe(request: HttpRequest, nickname: str):
         return JsonResponse(
             {
                 "success": True,
-                "subscribe": answer
+                "subscribe": answer,
+                "subscription_on": db.get_full_user(token, nickname)
             }
         )
     except Exception as ex:
@@ -224,29 +231,8 @@ def subscribe_unsubscribe(request: HttpRequest, nickname: str):
 def get_user(request: HttpRequest, nickname: str):
     try:
         token = request.headers.get('Authorization')
-        user = db.get_user(nickname=nickname)
-        photo_url = None
-        if user.photo:
-            photo_url = user.photo.url
-        return JsonResponse({
-            "nickname": user.nickname,
-            "phone_number": user.phone_number,
-            "email": user.email,
-            "is_admin": user.is_admin,
-            "is_phone_confirmed": user.is_phone_confirmed,
-            "full_name": user.full_name,
-            "description": user.description,
-            "gender": user.gender,
-            "birthday": user.timestamp,
-            "photo": photo_url,
-            "posts": get_user_posts(user.nickname),
-            "subscribers": list(map(lambda x: {"nickname": x.nickname, "photo": (x.photo.url if x.photo else None)},
-                                    db.get_subscribers(user.nickname))),
-            "subscriptions": list(map(lambda x: {"nickname": x.nickname, "photo": (x.photo.url if x.photo else None)},
-                                      db.get_subscriptions(user.nickname))),
-            "is_in_your_subscription": db.is_you_subscriber(user, token),
-            "is_in_your_subscribers": db.is_your_subscriber(user, token)
-        })
+        json_ = db.get_full_user(token, nickname)
+        return JsonResponse(json_)
     except Exception as ex:
         logger.error(ex)
         return HttpResponseBadRequest(ex)
@@ -267,3 +253,15 @@ def search(request: HttpRequest):
         logger.error(ex)
         return HttpResponseBadRequest(ex)
 
+
+@csrf_exempt
+def get_notifications(request: HttpRequest):
+    print(Users.objects.values())
+    token = request.headers.get('Authorization')
+    print(list(UserLikes.objects.filter(user=Users.objects.get(token=token)).all()))
+    list_ = list(map(lambda x: dict(x), list(UserLikes.objects.filter(user=Users.objects.get(token=token)).all())))
+    return JsonResponse(
+        {
+            "sorted_notif": list_
+        }
+    )

@@ -28,6 +28,7 @@ def create_post(request: HttpRequest):
         return JsonResponse(
             {
                 "post_created": True,
+                "post": db.get_post_by_id(post_id),
                 "id": post_id
             }
         )
@@ -63,6 +64,7 @@ def like_unlike_post(request: HttpRequest, post_id: int):
         logger.info("success: true")
         return JsonResponse(
             {
+                "post": db.get_post_by_id(post_id),
                 "success": True,
                 "is_like": state
             }
