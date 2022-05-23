@@ -25,6 +25,7 @@ class Media(models.Model):
 class UserLikes(models.Model):
     post = models.ForeignKey('posts.Posts', models.DO_NOTHING, blank=True, null=True)
     user = models.ForeignKey('users.Users', models.DO_NOTHING, blank=True, null=True)
+    timestamp = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = True

@@ -1,3 +1,8 @@
+from time import time
+
+import users
+from posts.db_communication import get_user_posts
+from stories.db_communication import get_story_view, get_stories
 from .models import Users, UserSubscriptions
 from django.core.files.base import ContentFile
 import base64
@@ -83,7 +88,8 @@ def subscribe_unsubscribe(token, nickname):
     if relation:
         relation.delete()
     else:
-        sub = UserSubscriptions(user_subscriber=get_user(token=token), user_subscription=get_user(nickname=nickname))
+        sub = UserSubscriptions(user_subscriber=get_user(token=token), user_subscription=get_user(nickname=nickname),
+                                timestamp=time())
         sub.save()
     return not relation
 
@@ -108,9 +114,57 @@ def get_result_by_search(string, token):
 
 
 def is_your_subscriber(user, token):
-    print(get_subscribers(Users.objects.get(token=token).nickname))
     return user in get_subscribers(Users.objects.get(token=token).nickname)
 
 
 def is_you_subscriber(user, token):
     return user in get_subscriptions(Users.objects.get(token=token).nickname)
+
+
+def get_full_user(token, nickname):
+    photo_url = None
+    user = get_user(nickname=nickname)
+    stories = sorted(get_stories(nickname=nickname), key=lambda x: x.timestamp)
+    all_stories = []
+    not_viewed_stories = []
+    for i in stories:
+        story = {
+            "media": i.media.url,
+            "media_type": i.media_type,
+            "timestamp": i.timestamp,
+        }
+        all_stories.append(story)
+        if user not in get_story_view(story_id=i.id):
+            not_viewed_stories.append(story)
+    if user.photo:
+        photo_url = user.photo.url
+    json_ = {
+        "nickname": user.nickname,
+        "phone_number": user.phone_number,
+        "email": user.email,
+        "is_admin": user.is_admin,
+        "is_phone_confirmed": user.is_phone_confirmed,
+        "full_name": user.full_name,
+        "description": user.description,
+        "gender": user.gender,
+        "birthday": user.timestamp,
+        "photo": photo_url,
+        "posts": get_user_posts(user.nickname),
+        "stories": {
+            "all_stories": all_stories,
+            "not_viewed_stories": not_viewed_stories
+        },
+        "subscribers": list(map(lambda x: {"nickname": x.nickname, "photo": (x.photo.url if x.photo else None),
+                                           "is_in_your_subscription": is_you_subscriber(x, user.token),
+                                           "is_in_your_subscribers": is_your_subscriber(x, user.token)
+                                           },
+                                get_subscribers(user.nickname))),
+        "subscriptions": list(map(lambda x: {"nickname": x.nickname, "photo": (x.photo.url if x.photo else None),
+                                             "is_in_your_subscription": is_you_subscriber(x, user.token),
+                                             "is_in_your_subscribers": is_your_subscriber(x, user.token)
+                                             },
+                                  get_subscriptions(user.nickname))),
+        "is_in_your_subscription": is_you_subscriber(user, token),
+        "is_in_your_subscribers": is_your_subscriber(user, token)
+    }
+    return json_

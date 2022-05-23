@@ -25,6 +25,7 @@ class UserSubscriptions(models.Model):
     user_subscriber = models.ForeignKey('Users', models.DO_NOTHING, blank=True, null=True, related_name="subscriber")
     user_subscription = models.ForeignKey('Users', models.DO_NOTHING, blank=True, null=True,
                                           related_name="subscription")
+    timestamp = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = True
