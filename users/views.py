@@ -7,9 +7,10 @@ import jwt
 from time import time
 import random
 
-from users.models import UserSubscriptions, Users
+from users.models import Users
 from ystories.settings import SMS_API_LOGIN, SMS_API_PASSWORD, SMS_API_SADR, SECRET_KEY
 import requests
+from stories.db_communication import get_stories, get_story_view
 from loguru import logger
 import hashlib
 from posts.db_communication import get_user_posts
@@ -241,8 +242,20 @@ def subscribe_unsubscribe(request: HttpRequest, nickname: str):
 def get_user(request: HttpRequest, nickname: str):
     try:
         token = request.headers.get('Authorization')
-        user = db.get_user(nickname=nickname)
         photo_url = None
+        user = db.get_user(nickname=nickname)
+        stories = sorted(get_stories(nickname=nickname), key=lambda x: x.timestamp)
+        all_stories = []
+        not_viewed_stories = []
+        for i in stories:
+            story = {
+                "media": i.media.url,
+                "media_type": i.media_type,
+                "timestamp": i.timestamp,
+            }
+            all_stories.append(story)
+            if user not in get_story_view(story_id=i.id):
+                not_viewed_stories.append(story)
         if user.photo:
             photo_url = user.photo.url
         return JsonResponse({
@@ -257,9 +270,19 @@ def get_user(request: HttpRequest, nickname: str):
             "birthday": user.timestamp,
             "photo": photo_url,
             "posts": get_user_posts(user.nickname),
-            "subscribers": list(map(lambda x: {"nickname": x.nickname, "photo": (x.photo.url if x.photo else None)},
+            "stories": {
+                "all_stories": all_stories,
+                "not_viewed_stories": not_viewed_stories
+            },
+            "subscribers": list(map(lambda x: {"nickname": x.nickname, "photo": (x.photo.url if x.photo else None),
+                                               "is_in_your_subscription": db.is_you_subscriber(x, token),
+                                               "is_in_your_subscribers": db.is_your_subscriber(x, token)
+                                               },
                                     db.get_subscribers(user.nickname))),
-            "subscriptions": list(map(lambda x: {"nickname": x.nickname, "photo": (x.photo.url if x.photo else None)},
+            "subscriptions": list(map(lambda x: {"nickname": x.nickname, "photo": (x.photo.url if x.photo else None),
+                                                 "is_in_your_subscription": db.is_you_subscriber(x, token),
+                                                 "is_in_your_subscribers": db.is_your_subscriber(x, token)
+                                                 },
                                       db.get_subscriptions(user.nickname))),
             "is_in_your_subscription": db.is_you_subscriber(user, token),
             "is_in_your_subscribers": db.is_your_subscriber(user, token)

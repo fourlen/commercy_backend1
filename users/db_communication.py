@@ -78,7 +78,8 @@ def update_description(token, full_name=None, nickname=None, description=None, g
 
 
 def subscribe_unsubscribe(token, nickname):
-    relation = UserSubscriptions.objects.filter(user_subscriber=get_user(token=token)).first()
+    relation = UserSubscriptions.objects.filter(user_subscriber=get_user(token=token),
+                                                user_subscription=get_user(nickname=nickname)).first()
     if relation:
         relation.delete()
     else:
@@ -107,10 +108,7 @@ def get_result_by_search(string, token):
 
 
 def is_your_subscriber(user, token):
-<<<<<<< HEAD
-=======
     print(get_subscribers(Users.objects.get(token=token).nickname))
->>>>>>> 3087f1173f52777d9e4a05946eb26a47a77c8e9e
     return user in get_subscribers(Users.objects.get(token=token).nickname)
 
 
