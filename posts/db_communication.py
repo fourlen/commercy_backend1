@@ -33,6 +33,7 @@ def add_post(nickname: str, description: str, medias: List['TypedDict']):
     
 
 def like_post(user_id, post_id):
+    owner = udb.get_user(nickname=Posts.objects.get(id=post_id).nickname)
     liked = UserLikes.objects.filter(user=Users.objects.get(id=user_id),
                                      post=Posts.objects.get(id=post_id)).first()
     if liked:
@@ -40,6 +41,8 @@ def like_post(user_id, post_id):
     else:
         new_like = UserLikes(user=Users.objects.get(id=user_id), post=Posts.objects.get(id=post_id),
                              timestamp=time())
+        owner.is_view_notification = False
+        owner.save()
         new_like.save()
     return not liked
 
@@ -47,8 +50,10 @@ def like_post(user_id, post_id):
 def get_post_by_id(post_id):
     post = Posts.objects.get(id=post_id)
     media = list(map(lambda x: {"media": x.media.url, "media_type": x.media_type}, list(Media.objects.filter(post_id=post_id).all())))
-    like_set = list(map(lambda x: x.user_id, UserLikes.objects.filter(post=post_id).all()))
+    like_set = list(map(lambda x: Users.objects.get(id=x.user_id).nickname, UserLikes.objects.filter(post=post_id).all()))
+    user = udb.get_user(nickname=post.nickname)
     return {
+        "user_photo": user.photo.url if user.photo else None,
         "post_id": post.id,
         "user_id": post.user_id,
         "user_name": post.nickname,
@@ -67,3 +72,23 @@ def get_user_posts(nickname: str):
             get_post_by_id(post_id=post.id)
         )
     return posts_with_media
+
+
+def get_all_posts():
+    return [
+        get_post_by_id(post.id)
+    for post in Posts.objects.filter().all()]
+
+def update_post(post_id: int, new_description: str):
+    post = Posts.objects.filter(id=post_id).first()
+    post.description =new_description
+    post.save()
+
+
+def delete_post(post_id: int):
+    post = Posts.objects.get(id=post_id)
+    for i in UserLikes.objects.filter(post=post):
+        i.delete()
+    for i in Media.objects.filter(post_id=post.id):
+        i.delete()
+    post.delete()

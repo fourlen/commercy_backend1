@@ -9,4 +9,5 @@ urlpatterns = [
     path('<slug:nickname>/get_stories', views.get_user_stories),
     path('story<int:story_id>', views.check_story),
     path('like_story<int:story_id>', views.like_unlike_story),
+    path('delete_story<int:story_id>', views.delete_stories)
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

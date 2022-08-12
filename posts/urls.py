@@ -24,5 +24,6 @@ urlpatterns = [
     path("post/<int:post_id>", views.get_post),
     path("like_post/<int:post_id>", views.like_unlike_post),
     path("feed", views.get_feed),
-    path("recommended", views.get_rec)
+    path("recommended", views.get_rec),
+    path("delete_post<int:post_id>", views.delete_post)
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

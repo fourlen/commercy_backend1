@@ -15,13 +15,32 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf.urls import url
 
 from django.conf import settings
 from django.conf.urls.static import static
+from rest_framework_swagger.views import get_swagger_view
+
+import os
+from django.views.static import serve
+
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+FLUTTER_WEB_APP = os.path.join(BASE_DIR, 'adminka')
+
+schema_view = get_swagger_view(title='Pastebin API')
+
+def flutter_redirect(request, resource):
+        return serve(request, resource, FLUTTER_WEB_APP)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('users/', include('users.urls')),
     path('posts/', include('posts.urls')),
-    path('stories/', include('stories.urls'))
+    path('stories/', include('stories.urls')),
+    path('cadmin/', include('cadmin.urls')),
+    path('adminka/', lambda r: flutter_redirect(r, 'index.html')),
+    path('adminka', lambda r: flutter_redirect(r, 'index.html')),
+    path('adminka/<path:resource>', flutter_redirect),
+    url(r'^$', schema_view),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

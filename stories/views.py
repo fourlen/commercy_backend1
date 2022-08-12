@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from rest_framework.decorators import api_view
 
 # Create your views here.
 from django.core.exceptions import ValidationError
@@ -8,9 +9,7 @@ import stories.db_communication as db
 import json
 from stories.models import *
 from loguru import logger
-
-from users.db_communication import get_user
-
+from users.models import Users
 
 # body: {
 #   "media": base64string,
@@ -18,13 +17,16 @@ from users.db_communication import get_user
 # }
 # return: {
 #   "success": bool
+@api_view(['POST'])
+@csrf_exempt
 def add_stories(request: HttpRequest):
     try:
         values = json.loads(request.body)
         stories = values['media']
         type_ = values['media_type']
+        is_reversed = values['is_reversed']
         token = request.headers.get('Authorization')
-        db.add_new_stories(token, stories, type_)
+        db.add_new_stories(token, stories, type_, is_reversed)
         return JsonResponse(
             {
                 "success": True
@@ -51,28 +53,15 @@ def add_stories(request: HttpRequest):
 # {"media": base64string, "media_type": string, "timestamp": int}
 # ...
 # ]
+@api_view(['GET'])
+@csrf_exempt
 def get_user_stories(request: HttpRequest, nickname: str):
     try:
-        user = get_user(nickname=nickname)
-        stories = sorted(db.get_stories(nickname=nickname), key=lambda x: x.timestamp)
-        all_stories = []
-        not_viewed_stories = []
-        for i in stories:
-            story = {
-                "media": i.media.url,
-                "media_type": i.media_type,
-                "timestamp": i.timestamp,
-            }
-            all_stories.append(story)
-            if user not in db.get_story_view(story_id=i.id):
-                not_viewed_stories.append(story)
-        photo = user.photo.url if user.photo else None
+        token = request.headers.get('Authorization')
+        user = Users.objects.get(token=token)
         return JsonResponse(
             {
-                "nickname": nickname,
-                "photo": photo,
-                "all_stories": all_stories,
-                "not_viewed_stories": not_viewed_stories
+                db.feed_stories(nickname, user)
             }
         )
     except Exception as ex:
@@ -81,6 +70,8 @@ def get_user_stories(request: HttpRequest, nickname: str):
 
 
 # {"media": base64string, "success": bool, "timestamp": int}
+@api_view(['PUT'])
+@csrf_exempt
 def check_story(request: HttpRequest, story_id: int):
     story = db.get_target_story(story_id=story_id)
     try:
@@ -99,6 +90,8 @@ def check_story(request: HttpRequest, story_id: int):
 
 
 # {"success": bool, "is_like_stayed": bool}
+@api_view(['PUT'])
+@csrf_exempt
 def like_unlike_story(request: HttpRequest, story_id: int):
     try:
         token = request.headers.get('Authorization')
@@ -113,3 +106,31 @@ def like_unlike_story(request: HttpRequest, story_id: int):
         logger.error(ex)
         return HttpResponseBadRequest(ex)
 
+
+@api_view(['DELETE'])
+@csrf_exempt
+def delete_stories(request: HttpRequest, story_id: int):
+    try:
+        token = request.headers.get('Authorization')
+        story = Stories.objects.get(id=story_id)
+        print(Stories.objects.filter(nickname=Users.objects.get(token=token).nickname))
+        if story.nickname != Users.objects.get(token=token).nickname:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "reason": "Not your story"
+                }
+            )
+        for i in UserLikesStories.objects.filter(liked_story=story):
+            i.delete()
+        for i in UserViewStories.objects.filter(viewed_story=story):
+            i.delete()
+        story.delete()
+        return JsonResponse(
+            {
+                "success": True
+            }
+        )
+    except Exception as ex:
+        logger.error(ex)
+        return HttpResponseBadRequest(ex)

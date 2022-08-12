@@ -5,8 +5,9 @@ from django.db import models
 
 class Stories(models.Model):
     nickname = models.CharField(max_length=100, blank=True, null=True)
-    media = models.FileField(null=True, blank=True, upload_to="stories/")
+    media = models.FileField(null=True, blank=True, upload_to="media/")
     media_type = models.CharField(max_length=100, blank=True, null=True)
+    is_reversed = models.BooleanField(blank=True, null=True, default=False, editable=False)
     timestamp = models.IntegerField(blank=True, null=True)
 
     class Meta:

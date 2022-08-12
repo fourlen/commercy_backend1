@@ -38,12 +38,19 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
+    'rest_framework_swagger',
+    'rest_framework',
     'users',
     'posts',
-    'stories'
+    'stories',
+    'cadmin',
 ]
 
+REST_FRAMEWORK = { 'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema' }
+
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -67,12 +74,17 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+        'libraries': {  # Adding this section should work around the issue.
+                'staticfiles': 'django.templatetags.static',
+            },
         },
     },
 ]
 
 WSGI_APPLICATION = 'ystories.wsgi.application'
 
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = 100 * 2 ** 20
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
@@ -84,6 +96,9 @@ DATABASES = {
     }
 }
 
+SWAGGER_SETTINGS = {
+    'JSON_EDITOR': True
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -125,6 +140,7 @@ STATIC_URL = '/static/'
 MEDIA_URL = ''
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+STORIES_MEDIA_ROOT = os.path.join(BASE_DIR, 'stories')
 
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'), )
 
@@ -137,3 +153,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SMS_API_LOGIN = '79506858326'
 SMS_API_PASSWORD = 'pGNbAZGKBv'
 SMS_API_SADR = 'SMS Info'
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_HEADERS = (
+    'content-disposition', 
+    'accept-encoding', 
+    'content-type', 
+    'accept', 
+    'origin', 
+    'authorization',
+    'cache-control'
+)
